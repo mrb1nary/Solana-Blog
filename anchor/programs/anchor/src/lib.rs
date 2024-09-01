@@ -19,13 +19,35 @@ pub mod blog {
       blog_post.body = body;
       Ok(())
     }
+
+    pub fn delete_blog(_ctx: Context<Delete>, _title: String)->Result<()>{
+        Ok(())
+    }
 }
+
+
+#[derive(Accounts)]
+#[instruction(title: String)]
+pub struct Delete<'info>{
+#[account(
+    mut,
+        seeds = [user.key().as_ref(), title.as_bytes()],
+        bump,
+        close = user,
+    )]
+    pub blog_post: Account<'info, BlogAccount>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+
 
 #[derive(Accounts)]
 #[instruction(title: String, body: String)]
 pub struct UpdateBlogPost<'info>{
 #[account(
-        mut,
+    mut,
         seeds = [user.key().as_ref(), title.as_bytes()],
         bump,
         realloc = 8 + 32 + 4 + title.len() + 4 + body.len(),

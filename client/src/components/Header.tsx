@@ -6,7 +6,6 @@ function Header() {
       <div className="bg-gray-800 text-white flex items-center w-full justify-between px-10 py-2 shadow-lg">
         <div className="flex space-x-8 cursor-pointer">
           <h4 className="flex justify-center items-center text-2xl hover:opacity-75 transition-opacity duration-300">Solana Blog</h4>
-          <h5 className="flex items-center justify-center text-xl pl-10 hover:opacity-75 transition-opacity duration-300">New Post</h5>
           <h5 className="flex items-center justify-center text-xl hover:opacity-75 transition-opacity duration-300">About</h5>
         </div>
         

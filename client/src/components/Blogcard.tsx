@@ -12,7 +12,7 @@ interface BlogCardProps {
   date?: string; // Optional: Date the post was created
   tags?: string[]; // Optional: Tags related to the blog post
   currentUserPublicKey: string; // Current user's public key
-  onDelete?: () => void; // Optional: Callback function for delete action
+  onDelete?: (title: string) => void; // Optional: Callback function for delete action
   onEdit?: (newBody: string, title: string) => void; // Optional: Callback function for edit action
 }
 
@@ -36,6 +36,13 @@ const BlogCard: React.FC<BlogCardProps> = ({
       onClose();
     }
   };
+
+  const handleDelete = () =>{
+    if(onDelete){
+      onDelete(title);
+      onClose();
+    }
+  }
 
   return (
     <Box
@@ -73,7 +80,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
               <Button colorScheme="blue" onClick={onOpen}>
                 Edit
               </Button>
-              <Button colorScheme="red" onClick={onDelete}>
+              <Button colorScheme="red" onClick={handleDelete}>
                 Delete
               </Button>
             </Flex>
