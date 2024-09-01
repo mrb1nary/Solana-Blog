@@ -8,6 +8,8 @@ import {
   Box,
   Text,
   VStack,
+  HStack,
+  Flex,
 } from '@chakra-ui/react';
 import {
   Modal,
@@ -89,7 +91,7 @@ function Buttons() {
       try {
         await program.methods.createBlog(title, body)
           .accounts({
-            blogPost: derivedPda,
+            blogPost: pda,
             user: wallet.publicKey,
             systemProgram: SystemProgram.programId,
           })
@@ -162,13 +164,26 @@ function Buttons() {
 
   return (
     <Box p={6}>
-      {/* Buttons Section */}
-      <Box className="w-full mt-10 bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 h-24 flex items-center justify-between p-6 rounded-lg shadow-lg">
-        <div className="flex space-x-4">
+      {/* Enhanced Buttons Section */}
+      <Flex
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        bgGradient="linear(to-r, gray.400, gray.500, gray.600)"
+        h="24"
+        p={6}
+        rounded="lg"
+        shadow="lg"
+        mb={6}
+      >
+        <HStack spacing={4}>
           <Button
             onClick={onOpen}
-            colorScheme="blue"
-            className="text-white w-28 py-2 rounded-md hover:bg-purple-700 transition duration-300 shadow-md"
+            colorScheme="teal"
+            bgGradient="linear(to-r, teal.400, teal.500)"
+            _hover={{ bgGradient: 'linear(to-r, teal.500, teal.600)' }}
+            shadow="md"
+            size="lg"
           >
             Create Post
           </Button>
@@ -202,23 +217,23 @@ function Buttons() {
                 <Button variant="ghost" onClick={onClose}>
                   Close
                 </Button>
-                <Button colorScheme="blue" mr={3} onClick={createBlogPost}>
+                <Button
+                  colorScheme="teal"
+                  onClick={createBlogPost}
+                  bgGradient="linear(to-r, teal.400, teal.500)"
+                  _hover={{ bgGradient: 'linear(to-r, teal.500, teal.600)' }}
+                  shadow="md"
+                >
                   Post
                 </Button>
               </ModalFooter>
             </ModalContent>
           </Modal>
-        </div>
-        <Button
-          colorScheme="red"
-          className="text-white w-28 py-2 rounded-md hover:bg-red-700 transition duration-300 shadow-md"
-        >
-          Delete Post
-        </Button>
-      </Box>
+        </HStack>
+      </Flex>
 
       {/* Blogs Display Section */}
-      <Box mt={10}>
+      <Box>
         {blogs.length === 0 ? (
           <Text>No blogs found. Create one!</Text>
         ) : (
@@ -229,6 +244,15 @@ function Buttons() {
                 title={blog.title}
                 body={blog.body}
                 owner={blog.owner.toBase58()}
+                w="full"
+                bg="white"
+                rounded="md"
+                shadow="md"
+                p={4}
+                currentUserPublicKey={wallet.publicKey.toBase58()}
+                border="1px"
+                borderColor="gray.200"
+                _hover={{ shadow: 'lg' }}
               />
             ))}
           </VStack>

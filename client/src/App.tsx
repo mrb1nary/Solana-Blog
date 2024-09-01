@@ -9,6 +9,7 @@ import {
 } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
 import Buttons from "./components/Buttons";
+import BlogCard from "./components/Blogcard";
 
 
 function App() {
