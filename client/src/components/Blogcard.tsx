@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Box, Heading, Text, Stack, Flex, Badge, Button,
   useDisclosure, Modal, ModalOverlay, ModalContent,
-  ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Input, Textarea
+  ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Textarea
 } from '@chakra-ui/react';
 
 interface BlogCardProps {
@@ -28,21 +28,30 @@ const BlogCard: React.FC<BlogCardProps> = ({
 }) => {
   const isOwner = owner === currentUserPublicKey;
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isEditing, setIsEditing] = useState(false);
   const [newBody, setNewBody] = useState(body);
 
-  const handleEdit = () => {
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(true);
+    onOpen(); // Ensure the modal opens when edit mode is triggered
+  };
+
+  const handleSave = () => {
     if (onEdit && currentUserPublicKey === owner) {
       onEdit(newBody, title);
+      setIsEditing(false);
       onClose();
     }
   };
 
-  const handleDelete = () =>{
-    if(onDelete){
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
       onDelete(title);
       onClose();
     }
-  }
+  };
 
   return (
     <Box
@@ -52,9 +61,10 @@ const BlogCard: React.FC<BlogCardProps> = ({
       p={6}
       boxShadow="md"
       bg="white"
-      w="full" // Takes full width
-      maxW="full" // Maximum width of the card
+      w="full"
+      maxW="full"
       _hover={{ boxShadow: "lg", transform: "translateY(-4px)", transition: "0.3s ease-in-out" }}
+      onClick={onOpen}
     >
       <Stack spacing={4}>
         <Heading size="lg">{title}</Heading>
@@ -65,7 +75,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
             ))}
           </Flex>
         )}
-        <Text noOfLines={4}>{body}</Text>
+        <Text noOfLines={4}>{body.split(" ").slice(0, 50).join(" ") + "..."}</Text>
         <Flex align="center" justify="space-between" mt={2}>
           <Text fontSize="sm" color="gray.600">
             {owner.slice(0, 4)}...{owner.slice(-4)}
@@ -77,7 +87,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
           )}
           {isOwner && (
             <Flex gap={2}>
-              <Button colorScheme="blue" onClick={onOpen}>
+              <Button colorScheme="blue" onClick={handleEdit}>
                 Edit
               </Button>
               <Button colorScheme="red" onClick={handleDelete}>
@@ -88,23 +98,31 @@ const BlogCard: React.FC<BlogCardProps> = ({
         </Flex>
       </Stack>
 
-      {/* Modal for Editing the Blog Post */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      {/* Modal for Viewing/Editing the Blog Post */}
+      <Modal isOpen={isOpen} onClose={() => { setIsEditing(false); onClose(); }} isCentered size="3xl">
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Edit Blog Post</ModalHeader>
+          <ModalHeader>{title}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Textarea
-              value={newBody}
-              onChange={(e) => setNewBody(e.target.value)}
-              placeholder="Edit your post"
-              size="sm"
-            />
+            {isEditing ? (
+              <Textarea
+                value={newBody}
+                onChange={(e) => setNewBody(e.target.value)}
+                placeholder="Edit your post"
+                size="sm"
+              />
+            ) : (
+              <Text>{body}</Text>
+            )}
           </ModalBody>
           <ModalFooter>
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
-            <Button colorScheme="blue" onClick={handleEdit}>Save</Button>
+            <Button variant="ghost" onClick={() => { setIsEditing(false); onClose(); }}>Cancel</Button>
+            {isEditing && (
+              <Button colorScheme="blue" onClick={handleSave}>
+                Save
+              </Button>
+            )}
           </ModalFooter>
         </ModalContent>
       </Modal>
