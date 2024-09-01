@@ -13,6 +13,29 @@ pub mod blog {
         blog_post.body = body;
         Ok(())
     }
+
+    pub fn update_blog(ctx: Context<UpdateBlogPost>, _title: String, body: String)->Result<()>{
+      let blog_post = &mut ctx.accounts.blog_post;
+      blog_post.body = body;
+      Ok(())
+    }
+}
+
+#[derive(Accounts)]
+#[instruction(title: String, body: String)]
+pub struct UpdateBlogPost<'info>{
+#[account(
+        mut,
+        seeds = [user.key().as_ref(), title.as_bytes()],
+        bump,
+        realloc = 8 + 32 + 4 + title.len() + 4 + body.len(),
+        realloc::payer = user,
+        realloc::zero = true
+    )]
+    pub blog_post: Account<'info, BlogAccount>,
+    #[account(mut)]
+    pub user: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]

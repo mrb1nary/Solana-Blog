@@ -122,6 +122,48 @@ function Buttons() {
     }
   };
 
+  // Function to update an existing blog post
+  const editBlog = async (newBody: string, title: string) => {
+    if (wallet.publicKey && title) {
+      const [derivedPda] = PublicKey.findProgramAddressSync(
+        [wallet.publicKey.toBuffer(), Buffer.from(title)],
+        programID
+      );
+      setPda(derivedPda);
+      console.log("Derived PDA:", derivedPda.toBase58());
+
+      try {
+        await program.methods.updateBlog(title, newBody)
+          .accounts({
+            blogPost: derivedPda,
+            user: wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
+
+        toast({
+          title: "Blog post updated.",
+          description: "Your blog post has been successfully updated!",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+
+        // Refresh the blog list after updating
+        fetchPost();
+      } catch (err) {
+        console.error("Error updating blog post:", err);
+        toast({
+          title: "Error",
+          description: "There was an error updating your blog post.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    }
+  };
+
   // Function to fetch all blog posts for the user
   const fetchPost = async () => {
     if (!wallet.publicKey) {
@@ -249,7 +291,8 @@ function Buttons() {
                 rounded="md"
                 shadow="md"
                 p={4}
-                currentUserPublicKey={wallet.publicKey.toBase58()}
+                onEdit={(newBody: string, title: string) => editBlog(newBody, title)}
+                currentUserPublicKey={wallet.publicKey?.toBase58() || ''}
                 border="1px"
                 borderColor="gray.200"
                 _hover={{ shadow: 'lg' }}

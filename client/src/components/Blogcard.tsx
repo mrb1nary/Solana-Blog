@@ -1,5 +1,9 @@
-import React from 'react';
-import { Box, Heading, Text, Stack, Flex, Badge, Button } from '@chakra-ui/react';
+import React, { useState } from 'react';
+import {
+  Box, Heading, Text, Stack, Flex, Badge, Button,
+  useDisclosure, Modal, ModalOverlay, ModalContent,
+  ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Input, Textarea
+} from '@chakra-ui/react';
 
 interface BlogCardProps {
   title: string;
@@ -9,6 +13,7 @@ interface BlogCardProps {
   tags?: string[]; // Optional: Tags related to the blog post
   currentUserPublicKey: string; // Current user's public key
   onDelete?: () => void; // Optional: Callback function for delete action
+  onEdit?: (newBody: string, title: string) => void; // Optional: Callback function for edit action
 }
 
 const BlogCard: React.FC<BlogCardProps> = ({
@@ -18,10 +23,20 @@ const BlogCard: React.FC<BlogCardProps> = ({
   date,
   tags,
   currentUserPublicKey,
-  onDelete
+  onDelete,
+  onEdit,
 }) => {
   const isOwner = owner === currentUserPublicKey;
-  console.log(owner, currentUserPublicKey);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [newBody, setNewBody] = useState(body);
+
+  const handleEdit = () => {
+    if (onEdit && currentUserPublicKey === owner) {
+      onEdit(newBody, title);
+      onClose();
+    }
+  };
+
   return (
     <Box
       borderWidth="1px"
@@ -54,12 +69,38 @@ const BlogCard: React.FC<BlogCardProps> = ({
             </Text>
           )}
           {isOwner && (
-            <Button colorScheme="red" onClick={onDelete}>
-              Delete
-            </Button>
+            <Flex gap={2}>
+              <Button colorScheme="blue" onClick={onOpen}>
+                Edit
+              </Button>
+              <Button colorScheme="red" onClick={onDelete}>
+                Delete
+              </Button>
+            </Flex>
           )}
         </Flex>
       </Stack>
+
+      {/* Modal for Editing the Blog Post */}
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Edit Blog Post</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Textarea
+              value={newBody}
+              onChange={(e) => setNewBody(e.target.value)}
+              placeholder="Edit your post"
+              size="sm"
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button colorScheme="blue" onClick={handleEdit}>Save</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
