@@ -30,7 +30,7 @@ pub mod blog {
 #[instruction(title: String)]
 pub struct Delete<'info>{
 #[account(
-    mut,
+        mut,
         seeds = [user.key().as_ref(), title.as_bytes()],
         bump,
         close = user,

@@ -60,17 +60,10 @@ function Buttons() {
   const program = new Program<Idl>(idl as Idl, provider);
 
   // Function to fetch all blogs for the user
-  async function fetchAllBlogsForUser(walletPublicKey: PublicKey) {
+  async function fetchAllBlogsForUser() {
     try {
       //@ts-ignore
-      const blogAccounts = await program.account.blogAccount.all([
-        {
-          memcmp: {
-            offset: 8, // Discriminator is 8 bytes
-            bytes: walletPublicKey.toBase58(), // Filter by the user's public key
-          },
-        },
-      ]);
+      const blogAccounts = await program.account.blogAccount.all();
       return blogAccounts;
     } catch (err) {
       console.error("Error fetching all blogs:", err);
@@ -223,7 +216,7 @@ function Buttons() {
 
     setLoading(true);
     try {
-      const blogData = await fetchAllBlogsForUser(wallet.publicKey);
+      const blogData = await fetchAllBlogsForUser();
       const blogsFetched = blogData.map((account) => account.account);
       setBlogs(blogsFetched);
       console.log("Blogs fetched:", blogsFetched);
