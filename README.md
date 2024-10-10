@@ -83,8 +83,3 @@ REACT_APP_PROGRAM_ID=YourDeployedProgramID
 <h2>Contributing</h2>
 <p>Contributions are welcome! Please fork the repository and create a pull request with your changes.</p>
 
-<h2>License</h2>
-<p>This project is licensed under the MIT License. See the <a href="LICENSE">LICENSE</a> file for details.</p>
-
-<hr>
-<p>Feel free to reach out if you have any questions or need help setting up the project!</p>
