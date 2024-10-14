@@ -1,18 +1,17 @@
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui"
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 
 function Header() {
-    
-    return (
-      <div className="bg-gray-800 text-white flex items-center w-full justify-between px-10 py-2 shadow-lg">
-        <div className="flex space-x-8 cursor-pointer">
-          <h4 className="flex justify-center items-center text-2xl hover:opacity-75 transition-opacity duration-300">Solana Blog</h4>
-          <h5 className="flex items-center justify-center text-xl hover:opacity-75 transition-opacity duration-300">About</h5>
-        </div>
-        
-        <WalletMultiButton className="hover:opacity-90 transition-opacity duration-300"/>
+  return (
+    <div className="bg-gradient-to-r from-gray-800 to-gray-700 text-white flex items-center justify-between px-10 py-2 shadow-lg rounded-lg">
+      <div className="flex space-x-8 cursor-pointer">
+        <h4 className="text-2xl hover:scale-105 transition-transform duration-300">
+          Solana Blog
+        </h4>
       </div>
-    );
-  }
-  
 
-export default Header
+      <WalletMultiButton className="hover:opacity-90 transition-opacity duration-300 rounded-lg shadow-md" />
+    </div>
+  );
+}
+
+export default Header;

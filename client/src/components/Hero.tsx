@@ -257,7 +257,7 @@ function Hero() {
         direction="column"
         alignItems="center"
         justifyContent="center"
-        bgGradient="linear(to-r, gray.400, gray.500, gray.600)"
+        bgGradient="linear(to-r, gray.600, gray.700, gray.800)"
         h="24"
         p={6}
         rounded="lg"

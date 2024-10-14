@@ -4,6 +4,7 @@ import {
   useDisclosure, Modal, ModalOverlay, ModalContent,
   ModalHeader, ModalFooter, ModalBody, ModalCloseButton, Textarea
 } from '@chakra-ui/react';
+import {useWallet} from "@solana/wallet-adapter-react";
 
 interface BlogCardProps {
   title: string;
@@ -22,11 +23,15 @@ const BlogCard: React.FC<BlogCardProps> = ({
   owner,
   date,
   tags,
-  currentUserPublicKey,
   onDelete,
   onEdit,
 }) => {
-  const isOwner = owner === currentUserPublicKey;
+
+  const {publicKey} = useWallet();
+  const isOwner = owner === publicKey?.toBase58();
+  console.log('Is Owner:', isOwner);
+  console.log('Owner:', owner);
+  
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isEditing, setIsEditing] = useState(false);
   const [newBody, setNewBody] = useState(body);
@@ -38,7 +43,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
   };
 
   const handleSave = () => {
-    if (onEdit && currentUserPublicKey === owner) {
+    if (onEdit && publicKey?.toBase58() === owner) {
       onEdit(newBody, title);
       setIsEditing(false);
       onClose();
@@ -52,8 +57,11 @@ const BlogCard: React.FC<BlogCardProps> = ({
       onClose();
     }
   };
+  
 
   return (
+    <>
+    
     <Box
       borderWidth="1px"
       borderRadius="lg"
@@ -86,7 +94,8 @@ const BlogCard: React.FC<BlogCardProps> = ({
             <Text fontSize="xs" color="gray.500">
               {new Date(date).toLocaleDateString()}
             </Text>
-          )}
+          )} 
+          
           {isOwner && (
             <Flex gap={2}>
               <Button size="sm" colorScheme="blue" onClick={handleEdit}>
@@ -99,6 +108,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
           )}
         </Flex>
       </Stack>
+      
 
       {/* Modal for Viewing/Editing the Blog Post */}
       <Modal isOpen={isOpen} onClose={() => { setIsEditing(false); onClose(); }} isCentered size="3xl">
@@ -129,6 +139,7 @@ const BlogCard: React.FC<BlogCardProps> = ({
         </ModalContent>
       </Modal>
     </Box>
+    </>
   );
 };
 
