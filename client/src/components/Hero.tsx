@@ -24,12 +24,12 @@ import { web3, Program, AnchorProvider, Idl } from '@coral-xyz/anchor';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { clusterApiUrl, Connection, PublicKey, SystemProgram } from '@solana/web3.js';
 import idl from '../../../anchor/target/idl/blog.json';
-import { WalletContextState } from "@solana/wallet-adapter-react";
+import { WalletContextState } from '@solana/wallet-adapter-react';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 
 import Blogcard from './Blogcard'; // Import the BlogCard component
 
-function Buttons() {
+function Hero() {
   const programID = new PublicKey(idl.address);
   const opts: web3.ConnectionConfig = { commitment: 'processed' };
   const toast = useToast();
@@ -49,7 +49,6 @@ function Buttons() {
     signAllTransactions(txs: web3.Transaction[]): Promise<web3.Transaction[]>;
   };
 
-  // const connection = new Connection(localNetworkUrl, opts.commitment);
   const connection = new Connection(clusterApiUrl('devnet'), opts.commitment);
   const provider = new AnchorProvider(
     connection,
@@ -81,9 +80,7 @@ function Buttons() {
         programID
       );
       setPda(derivedPda);
-      console.log(pda?.toBase58());
-      
-      // Fetch account info to check if PDA is already initialized
+
       const accountInfo = await connection.getAccountInfo(derivedPda);
       
       if (accountInfo) {
@@ -128,11 +125,7 @@ function Buttons() {
       }
     }
   };
-  
 
-  
-
-  //Function to delete a blog post
   const deleteBlog = async (title: string) => {
     if (wallet.publicKey && title) {
       const [derivedPda] = PublicKey.findProgramAddressSync(
@@ -140,7 +133,6 @@ function Buttons() {
         programID
       );
       setPda(derivedPda);
-      console.log("Derived PDA:", derivedPda.toBase58());
 
       try {
         await program.methods.deleteBlog(title)
@@ -160,8 +152,6 @@ function Buttons() {
         });
 
         onClose(); // Close the modal on success
-
-        // Refresh the blog list after creation
         fetchPost();
       } catch (err) {
         console.error("Error deleting blog post:", err);
@@ -175,9 +165,7 @@ function Buttons() {
       }
     }
   };
-  
 
-  // Function to update an existing blog post
   const editBlog = async (newBody: string, title: string) => {
     if (wallet.publicKey && title) {
       const [derivedPda] = PublicKey.findProgramAddressSync(
@@ -185,10 +173,8 @@ function Buttons() {
         programID
       );
       setPda(derivedPda);
-      console.log("Derived PDA:", derivedPda.toBase58());
   
       try {
-        // Create the transaction
         const tx = new Transaction().add(
           await program.methods.updateBlog(title, newBody)
             .accounts({
@@ -199,13 +185,11 @@ function Buttons() {
             .instruction()
         );
   
-        // Simulate the transaction
         const simulationResult = await connection.simulateTransaction(tx, [wallet]);
         if (simulationResult.value.err) {
           throw new Error(`Simulation failed: ${JSON.stringify(simulationResult.value.err)}`);
         }
   
-        // Send the actual transaction
         await sendAndConfirmTransaction(connection, tx, [wallet]);
   
         toast({
@@ -216,7 +200,6 @@ function Buttons() {
           isClosable: true,
         });
   
-        // Refresh the blog list after updating
         fetchPost();
       } catch (err) {
         console.error("Error updating blog post:", err);
@@ -230,9 +213,7 @@ function Buttons() {
       }
     }
   };
-  
 
-  // Function to fetch all blog posts for the user
   const fetchPost = async () => {
     if (!wallet.publicKey) {
       toast({
@@ -250,7 +231,6 @@ function Buttons() {
       const blogData = await fetchAllBlogsForUser();
       const blogsFetched = blogData.map((account) => account.account);
       setBlogs(blogsFetched);
-      console.log("Blogs fetched:", blogsFetched);
     } catch (err) {
       console.error("Error fetching blogs:", err);
       toast({
@@ -265,7 +245,6 @@ function Buttons() {
     }
   };
 
-  // Automatically fetch posts on page load
   useEffect(() => {
     if (wallet.publicKey) {
       fetchPost();
@@ -274,7 +253,6 @@ function Buttons() {
 
   return (
     <Box p={6}>
-      {/* Enhanced Buttons Section */}
       <Flex
         direction="column"
         alignItems="center"
@@ -298,7 +276,6 @@ function Buttons() {
             Create Post
           </Button>
 
-          {/* Modal for Creating a New Post */}
           <Modal isOpen={isOpen} onClose={onClose} isCentered motionPreset="slideInRight" size="xl">
             <ModalOverlay backdropFilter="auto" backdropInvert="30%" backdropBlur="3px" />
             <ModalContent>
@@ -313,10 +290,11 @@ function Buttons() {
                     value={title}
                   />
                 </Box>
-                <Box>
-                  <Text fontWeight="bold" mb={2}>Content of the post</Text>
+
+                <Box mb={4}>
+                  <Text fontWeight="bold" mb={2}>Body</Text>
                   <Textarea
-                    placeholder="Describe your post"
+                    placeholder="Your thoughts..."
                     onChange={(e) => setBody(e.target.value)}
                     value={body}
                   />
@@ -324,54 +302,36 @@ function Buttons() {
               </ModalBody>
 
               <ModalFooter>
-                <Button variant="ghost" onClick={onClose}>
-                  Close
+                <Button colorScheme="blue" mr={3} onClick={createBlogPost}>
+                  Save
                 </Button>
-                <Button
-                  colorScheme="teal"
-                  onClick={createBlogPost}
-                  bgGradient="linear(to-r, teal.400, teal.500)"
-                  _hover={{ bgGradient: 'linear(to-r, teal.500, teal.600)' }}
-                  shadow="md"
-                >
-                  Post
-                </Button>
+                <Button variant="ghost" onClick={onClose}>Close</Button>
               </ModalFooter>
             </ModalContent>
           </Modal>
         </HStack>
       </Flex>
 
-      {/* Blogs Display Section */}
-      <Box>
-        {blogs.length === 0 ? (
-          <Text>No blogs found. Create one!</Text>
-        ) : (
-          <VStack spacing={6} align="stretch">
-            {blogs.map((blog, index) => (
-              <Blogcard
-                key={index}
-                title={blog.title}
-                body={blog.body}
-                owner={blog.owner.toBase58()}
-                w="full"
-                bg="white"
-                rounded="md"
-                shadow="md"
-                p={4}
-                onEdit={(newBody: string, title: string) => editBlog(newBody, title)}
-                onDelete={(title: string)=> deleteBlog(title)}
-                currentUserPublicKey={wallet.publicKey?.toBase58() || ''}
-                border="1px"
-                borderColor="gray.200"
-                _hover={{ shadow: 'lg' }}
-              />
-            ))}
-          </VStack>
-        )}
-      </Box>
+      <Flex
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <VStack spacing={6} alignItems="center" maxW="container.md">
+          {blogs.map((blog, idx) => (
+            <Blogcard
+              key={idx}
+              title={blog.title}
+              body={blog.body}
+              owner={blog.owner.toBase58()}
+              onDelete={deleteBlog}
+              onEdit={editBlog}
+            />
+          ))}
+        </VStack>
+      </Flex>
     </Box>
   );
 }
 
-export default Buttons;
+export default Hero;

@@ -58,39 +58,41 @@ const BlogCard: React.FC<BlogCardProps> = ({
       borderWidth="1px"
       borderRadius="lg"
       overflow="hidden"
-      p={6}
-      boxShadow="md"
-      bg="white"
+      p={4} // Make padding smaller for compact cards
+      boxShadow="lg" // Keep shadow for depth
+      bgGradient="linear(to-b, gray.800, black)" // Dark gradient from gray to black
+      color="white"
       w="full"
-      maxW="full"
-      _hover={{ boxShadow: "lg", transform: "translateY(-4px)", transition: "0.3s ease-in-out" }}
+      maxW="4xl" // Set a smaller width
+      _hover={{ boxShadow: "xl", transform: "translateY(-4px)", transition: "0.3s ease-in-out" }}
       onClick={onOpen}
+      cursor="pointer"
     >
-      <Stack spacing={4}>
-        <Heading size="lg">{title}</Heading>
+      <Stack spacing={3}>
+        <Heading size="md">{title}</Heading>
         {tags && (
           <Flex wrap="wrap" gap={2}>
             {tags.map((tag, index) => (
-              <Badge key={index} colorScheme="blue">{tag}</Badge>
+              <Badge key={index} colorScheme="purple">{tag}</Badge>
             ))}
           </Flex>
         )}
-        <Text noOfLines={4}>{body.split(" ").slice(0, 50).join(" ") + "..."}</Text>
+        <Text noOfLines={3}>{body.split(" ").slice(0, 50).join(" ") + "..."}</Text>
         <Flex align="center" justify="space-between" mt={2}>
-          <Text fontSize="sm" color="gray.600">
+          <Text fontSize="xs" color="gray.400">
             {owner.slice(0, 4)}...{owner.slice(-4)}
           </Text>
           {date && (
-            <Text fontSize="sm" color="gray.500">
+            <Text fontSize="xs" color="gray.500">
               {new Date(date).toLocaleDateString()}
             </Text>
           )}
           {isOwner && (
             <Flex gap={2}>
-              <Button colorScheme="blue" onClick={handleEdit}>
+              <Button size="sm" colorScheme="blue" onClick={handleEdit}>
                 Edit
               </Button>
-              <Button colorScheme="red" onClick={handleDelete}>
+              <Button size="sm" colorScheme="red" onClick={handleDelete}>
                 Delete
               </Button>
             </Flex>
