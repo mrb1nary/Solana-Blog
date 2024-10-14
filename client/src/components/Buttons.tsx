@@ -22,14 +22,15 @@ import {
 } from '@chakra-ui/react';
 import { web3, Program, AnchorProvider, Idl } from '@coral-xyz/anchor';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Connection, PublicKey, SystemProgram } from '@solana/web3.js';
+import { clusterApiUrl, Connection, PublicKey, SystemProgram } from '@solana/web3.js';
 import idl from '../../../anchor/target/idl/blog.json';
 import { WalletContextState } from "@solana/wallet-adapter-react";
+import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
+
 import Blogcard from './Blogcard'; // Import the BlogCard component
 
 function Buttons() {
   const programID = new PublicKey(idl.address);
-  const localNetworkUrl = 'http://localhost:8899'; // Local network URL
   const opts: web3.ConnectionConfig = { commitment: 'processed' };
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -48,7 +49,8 @@ function Buttons() {
     signAllTransactions(txs: web3.Transaction[]): Promise<web3.Transaction[]>;
   };
 
-  const connection = new Connection(localNetworkUrl, opts.commitment);
+  // const connection = new Connection(localNetworkUrl, opts.commitment);
+  const connection = new Connection(clusterApiUrl('devnet'), opts.commitment);
   const provider = new AnchorProvider(
     connection,
     wallet as SolanaWallet,
@@ -79,8 +81,22 @@ function Buttons() {
         programID
       );
       setPda(derivedPda);
-      console.log("Derived PDA:", derivedPda.toBase58());
-
+      console.log(pda?.toBase58());
+      
+      // Fetch account info to check if PDA is already initialized
+      const accountInfo = await connection.getAccountInfo(derivedPda);
+      
+      if (accountInfo) {
+        toast({
+          title: "Error",
+          description: "A blog post with this title already exists.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        return;
+      }
+  
       try {
         await program.methods.createBlog(title, body)
           .accounts({
@@ -89,7 +105,7 @@ function Buttons() {
             systemProgram: SystemProgram.programId,
           })
           .rpc();
-
+  
         toast({
           title: "Blog post created.",
           description: "Your blog post has been successfully created!",
@@ -97,10 +113,8 @@ function Buttons() {
           duration: 5000,
           isClosable: true,
         });
-
+  
         onClose(); // Close the modal on success
-
-        // Refresh the blog list after creation
         fetchPost();
       } catch (err) {
         console.error("Error creating blog post:", err);
@@ -114,6 +128,9 @@ function Buttons() {
       }
     }
   };
+  
+
+  
 
   //Function to delete a blog post
   const deleteBlog = async (title: string) => {
@@ -158,6 +175,7 @@ function Buttons() {
       }
     }
   };
+  
 
   // Function to update an existing blog post
   const editBlog = async (newBody: string, title: string) => {
@@ -168,16 +186,28 @@ function Buttons() {
       );
       setPda(derivedPda);
       console.log("Derived PDA:", derivedPda.toBase58());
-
+  
       try {
-        await program.methods.updateBlog(title, newBody)
-          .accounts({
-            blogPost: derivedPda,
-            user: wallet.publicKey,
-            systemProgram: SystemProgram.programId,
-          })
-          .rpc();
-
+        // Create the transaction
+        const tx = new Transaction().add(
+          await program.methods.updateBlog(title, newBody)
+            .accounts({
+              blogPost: derivedPda,
+              user: wallet.publicKey,
+              systemProgram: SystemProgram.programId,
+            })
+            .instruction()
+        );
+  
+        // Simulate the transaction
+        const simulationResult = await connection.simulateTransaction(tx, [wallet]);
+        if (simulationResult.value.err) {
+          throw new Error(`Simulation failed: ${JSON.stringify(simulationResult.value.err)}`);
+        }
+  
+        // Send the actual transaction
+        await sendAndConfirmTransaction(connection, tx, [wallet]);
+  
         toast({
           title: "Blog post updated.",
           description: "Your blog post has been successfully updated!",
@@ -185,7 +215,7 @@ function Buttons() {
           duration: 5000,
           isClosable: true,
         });
-
+  
         // Refresh the blog list after updating
         fetchPost();
       } catch (err) {
@@ -200,6 +230,7 @@ function Buttons() {
       }
     }
   };
+  
 
   // Function to fetch all blog posts for the user
   const fetchPost = async () => {
