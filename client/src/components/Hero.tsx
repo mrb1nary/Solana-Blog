@@ -25,7 +25,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { clusterApiUrl, Connection, PublicKey, SystemProgram } from '@solana/web3.js';
 import idl from '../blog.json';
 import { WalletContextState } from '@solana/wallet-adapter-react';
-import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
+import { Buffer } from 'buffer';
 
 import Blogcard from './Blogcard'; // Import the BlogCard component
 
