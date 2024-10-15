@@ -173,25 +173,17 @@ function Hero() {
         programID
       );
       setPda(derivedPda);
-  
+      console.log("Derived PDA:", derivedPda.toBase58());
+
       try {
-        const tx = new Transaction().add(
-          await program.methods.updateBlog(title, newBody)
-            .accounts({
-              blogPost: derivedPda,
-              user: wallet.publicKey,
-              systemProgram: SystemProgram.programId,
-            })
-            .instruction()
-        );
-  
-        const simulationResult = await connection.simulateTransaction(tx, [wallet]);
-        if (simulationResult.value.err) {
-          throw new Error(`Simulation failed: ${JSON.stringify(simulationResult.value.err)}`);
-        }
-  
-        await sendAndConfirmTransaction(connection, tx, [wallet]);
-  
+        await program.methods.updateBlog(title, newBody)
+          .accounts({
+            blogPost: derivedPda,
+            user: wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+          })
+          .rpc();
+
         toast({
           title: "Blog post updated.",
           description: "Your blog post has been successfully updated!",
@@ -199,7 +191,8 @@ function Hero() {
           duration: 5000,
           isClosable: true,
         });
-  
+
+        // Refresh the blog list after updating
         fetchPost();
       } catch (err) {
         console.error("Error updating blog post:", err);
