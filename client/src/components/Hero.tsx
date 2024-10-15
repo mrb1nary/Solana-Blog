@@ -23,7 +23,7 @@ import {
 import { web3, Program, AnchorProvider, Idl } from '@coral-xyz/anchor';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { clusterApiUrl, Connection, PublicKey, SystemProgram } from '@solana/web3.js';
-import idl from '../../../anchor/target/idl/blog.json';
+import idl from '../blog.json';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import { sendAndConfirmTransaction, Transaction } from '@solana/web3.js';
 
